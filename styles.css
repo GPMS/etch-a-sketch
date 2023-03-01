@@ -1,0 +1,73 @@
+/* Minimal Reset CSS */
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* My Custom CSS */
+
+body {
+  text-align: center;
+  color: #333;
+}
+
+button {
+  background-color: #333;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 700;
+  padding: 0.5em;
+  border-radius: 8px;
+}
+
+button:hover,
+button:focus {
+  background-color: blue;
+}
+
+h1 {
+  margin-bottom: 2rem;
+}
+
+.fake-canvas {
+  border-width: 1px;
+  border-style: solid;
+  border-color: black;
+  width: 350px;
+  height: 350px;
+  margin: 2rem auto;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+}
