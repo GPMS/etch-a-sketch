@@ -1,6 +1,7 @@
 const fakeCanvas = document.querySelector("#fake-canvas");
 const resetButton = document.querySelector("#reset-btn");
 const randomColor = document.querySelector("#random");
+const darkenColor = document.querySelector("#darken");
 
 let canvasDimension = 16;
 
@@ -23,6 +24,52 @@ function getRandomColor() {
 }
 
 /**
+ * Clamps the given value between the min and max
+ * @param {number} value The number to clamp
+ * @param {number} min Minimum allowed value
+ * @param {number} max Maximum allowed value
+ * @returns {number} A number inside the interval [min;max]
+ */
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Increases the given color brightness by percent%
+ * @param {string} color The starting color
+ * @param {number} percent How much to increase the brightness by
+ * @returns {object} A RGB color
+ */
+function increaseColorBrightness(color, percent) {
+  const redAmount = color.r / 256;
+  const greenAmount = color.g / 256;
+  const blueAmount = color.b / 256;
+  percent = percent / 100;
+  return {
+    r: Math.floor(clamp((redAmount + percent) * 256, 0, 256)),
+    g: Math.floor(clamp((greenAmount + percent) * 256, 0, 256)),
+    b: Math.floor(clamp((blueAmount + percent) * 256, 0, 256)),
+  };
+}
+
+/**
+ * Gets the rgb values out of a CSS color
+ * @param {string} cssColor a color in the format "rgb('r','g','b');"
+ * @returns {object} A RGB color
+ */
+function rgbCSSColorToRGB(cssColor) {
+  if (!cssColor) {
+    return undefined;
+  }
+  let colorValues = [...cssColor.matchAll(/\d+/g)];
+  return {
+    r: Number(colorValues[0][0]),
+    g: Number(colorValues[1][0]),
+    b: Number(colorValues[2][0]),
+  };
+}
+
+/**
  * Change the background color of the given cell's position
  * @param {number} x cell's x position
  * @param {number} y cell's y position
@@ -30,15 +77,19 @@ function getRandomColor() {
 function changeCellColor(x, y) {
   const index = y * canvasDimension + Math.floor(x % canvasDimension);
   let cell = fakeCanvas.childNodes[index];
-  let color = undefined;
-  if (randomColor.checked) {
-    color = getRandomColor();
-  } else {
-    color = {
-      r: 240,
-      g: 240,
-      b: 240,
-    };
+  let color = cell.style.backgroundColor;
+  if (!color) {
+    if (randomColor.checked) {
+      color = getRandomColor();
+    } else {
+      color = {
+        r: 240,
+        g: 240,
+        b: 240,
+      };
+    }
+  } else if (darkenColor.checked) {
+    color = increaseColorBrightness(rgbCSSColorToRGB(color), -10);
   }
   cell.style.backgroundColor = `rgb(${color.r},${color.b},${color.g})`;
 }
