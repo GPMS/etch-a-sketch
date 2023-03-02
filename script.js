@@ -1,5 +1,6 @@
 const fakeCanvas = document.querySelector("#fake-canvas");
 const resetButton = document.querySelector("#reset-btn");
+const randomColor = document.querySelector("#random");
 
 let canvasDimension = 16;
 
@@ -29,7 +30,16 @@ function getRandomColor() {
 function changeCellColor(x, y) {
   const index = y * canvasDimension + Math.floor(x % canvasDimension);
   let cell = fakeCanvas.childNodes[index];
-  let color = getRandomColor();
+  let color = undefined;
+  if (randomColor.checked) {
+    color = getRandomColor();
+  } else {
+    color = {
+      r: 240,
+      g: 240,
+      b: 240,
+    };
+  }
   cell.style.backgroundColor = `rgb(${color.r},${color.b},${color.g})`;
 }
 
