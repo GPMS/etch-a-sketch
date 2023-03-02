@@ -10,6 +10,18 @@ let canvasDimension = 16;
 let prevPos = undefined;
 
 /**
+ * Generates a random RGB color
+ * @returns {object} A RGB color
+ */
+function getRandomColor() {
+  return {
+    r: Math.floor(Math.random() * 256),
+    g: Math.floor(Math.random() * 256),
+    b: Math.floor(Math.random() * 256),
+  };
+}
+
+/**
  * Change the background color of the given cell's position
  * @param {number} x cell's x position
  * @param {number} y cell's y position
@@ -17,7 +29,8 @@ let prevPos = undefined;
 function changeCellColor(x, y) {
   const index = y * canvasDimension + Math.floor(x % canvasDimension);
   let cell = fakeCanvas.childNodes[index];
-  cell.style.backgroundColor = "black";
+  let color = getRandomColor();
+  cell.style.backgroundColor = `rgb(${color.r},${color.b},${color.g})`;
 }
 
 /**
