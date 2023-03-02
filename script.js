@@ -1,4 +1,5 @@
 const fakeCanvas = document.querySelector("#fake-canvas");
+const resetButton = document.querySelector("#reset-btn");
 
 let canvasDimension = 16;
 
@@ -94,6 +95,23 @@ function generateCanvasCells() {
   }
 }
 
+/**
+ * Prompts the user for a new dimension and changes
+ * the canvas to match it
+ */
+function resetCanvas() {
+  let newDimension = undefined;
+  while (!newDimension || newDimension > 100 || newDimension < 0) {
+    newDimension = Number(
+      prompt("What canvas dimension do you want (up to 100)?")
+    );
+  }
+  canvasDimension = newDimension;
+  fakeCanvas.style.setProperty("--dimension", newDimension);
+  fakeCanvas.textContent = "";
+  generateCanvasCells();
+}
+
 window.onload = () => {
   generateCanvasCells();
 
@@ -101,5 +119,9 @@ window.onload = () => {
   // otherwise the line will jump once it reenters.
   fakeCanvas.addEventListener("mouseleave", () => {
     prevPos = undefined;
+  });
+
+  resetButton.addEventListener("click", (e) => {
+    resetCanvas();
   });
 };
