@@ -8,3 +8,6 @@ In this project we try to simulate a canvas with divs and allow the user to draw
 ## Skills Learned
 
 - CSS grid;
+- CSS variables;
+- HTML input types (radio button and checkbox) and labels;
+- New JS event types (mouseenter and mouseleave);
