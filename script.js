@@ -6,10 +6,44 @@ const darkenColor = document.querySelector("#darken");
 let canvasDimension = 16;
 
 /**
- * The cell coordinates the mouse was previously at
- * @type {object}
+ * Generates divs to fill in the canvas based on the
+ * configured dimensions
  */
-let prevPos = undefined;
+function generateCells() {
+  fakeCanvas.textContent = "";
+  const cellCount = canvasDimension * canvasDimension;
+  for (let index = 0; index < cellCount; index++) {
+    let cell = document.createElement("div");
+    cell.classList.add("cell");
+    const x = Math.floor(index % canvasDimension);
+    const y = Math.floor(index / canvasDimension);
+    cell.setAttribute("data-x", x);
+    cell.setAttribute("data-y", y);
+    fakeCanvas.append(cell);
+  }
+}
+
+/**
+ * Prompts the user for a new dimension and changes
+ * the canvas to match it
+ */
+function resetCanvas() {
+  // Don't stop asking for a new dimension until we get a valid value
+  let newDimension;
+  while (!newDimension || newDimension > 100 || newDimension < 0) {
+    newDimension = Number(
+      prompt("What canvas dimension do you want (up to 100)?", 16)
+    );
+  }
+
+  // Set dimension and regenerate cells
+  canvasDimension = newDimension;
+  fakeCanvas.style.setProperty("--dimension", newDimension);
+  generateCells();
+
+  // Resume painting
+  startPainting();
+}
 
 /**
  * Generates a random RGB color
@@ -17,9 +51,9 @@ let prevPos = undefined;
  */
 function getRandomColor() {
   return {
-    r: Math.floor(Math.random() * 256),
-    g: Math.floor(Math.random() * 256),
-    b: Math.floor(Math.random() * 256),
+    r: Math.floor(Math.random() * 255),
+    g: Math.floor(Math.random() * 255),
+    b: Math.floor(Math.random() * 255),
   };
 }
 
@@ -35,20 +69,20 @@ function clamp(value, min, max) {
 }
 
 /**
- * Increases the given color brightness by percent%
+ * Changes the given color brightness by percent%
  * @param {string} color The starting color
  * @param {number} percent How much to increase the brightness by
  * @returns {object} A RGB color
  */
-function increaseColorBrightness(color, percent) {
-  const redAmount = color.r / 256;
-  const greenAmount = color.g / 256;
-  const blueAmount = color.b / 256;
+function changeColorBrightness(color, percent) {
+  const redAmount = color.r / 255;
+  const greenAmount = color.g / 255;
+  const blueAmount = color.b / 255;
   percent = percent / 100;
   return {
-    r: Math.floor(clamp((redAmount + percent) * 256, 0, 256)),
-    g: Math.floor(clamp((greenAmount + percent) * 256, 0, 256)),
-    b: Math.floor(clamp((blueAmount + percent) * 256, 0, 256)),
+    r: Math.floor(clamp((redAmount + percent) * 255, 0, 255)),
+    g: Math.floor(clamp((greenAmount + percent) * 255, 0, 255)),
+    b: Math.floor(clamp((blueAmount + percent) * 255, 0, 255)),
   };
 }
 
@@ -89,9 +123,10 @@ function changeCellColor(x, y) {
       };
     }
   } else if (darkenColor.checked) {
-    color = increaseColorBrightness(rgbCSSColorToRGB(color), -10);
+    // Decrease color brightness by 10%
+    color = changeColorBrightness(rgbCSSColorToRGB(color), -10);
   }
-  cell.style.backgroundColor = `rgb(${color.r},${color.b},${color.g})`;
+  cell.style.backgroundColor = `rgb(${color.r},${color.g},${color.b})`;
 }
 
 /**
@@ -134,68 +169,44 @@ function plotLine(x0, y0, x1, y1) {
   }
 }
 
-function mouseLeave(e) {
-  prevPos = {
-    x: Number(e.target.dataset.x),
-    y: Number(e.target.dataset.y),
-  };
-}
-
-function mouseEnter(e) {
-  const thisX = Number(e.target.dataset.x);
-  const thisY = Number(e.target.dataset.y);
-  if (!prevPos) {
-    changeCellColor(thisX, thisY);
-  } else {
-    plotLine(prevPos.x, prevPos.y, thisX, thisY);
-  }
-}
-
 /**
- * Generates divs to fill in the canvas based on the
- * configured dimensions
+ * Add event listeners to enable painting
  */
-function generateCanvasCells() {
-  for (let index = 0; index < canvasDimension * canvasDimension; index++) {
-    let cell = document.createElement("div");
-    cell.classList.add("cell");
-    const x = Math.floor(index % canvasDimension);
-    const y = Math.floor(index / canvasDimension);
-    cell.setAttribute("data-x", x);
-    cell.setAttribute("data-y", y);
-    cell.addEventListener("mouseenter", mouseEnter, true);
-    cell.addEventListener("mouseleave", mouseLeave, true);
-    fakeCanvas.append(cell);
-  }
-}
+function startPainting() {
+  let prevPos = undefined;
 
-/**
- * Prompts the user for a new dimension and changes
- * the canvas to match it
- */
-function resetCanvas() {
-  let newDimension = undefined;
-  while (!newDimension || newDimension > 100 || newDimension < 0) {
-    newDimension = Number(
-      prompt("What canvas dimension do you want (up to 100)?")
-    );
-  }
-  canvasDimension = newDimension;
-  fakeCanvas.style.setProperty("--dimension", newDimension);
-  fakeCanvas.textContent = "";
-  generateCanvasCells();
-}
+  fakeCanvas.childNodes.forEach((cell) => {
+    cell.addEventListener("mouseleave", (e) => {
+      prevPos = {
+        x: Number(e.target.dataset.x),
+        y: Number(e.target.dataset.y),
+      };
+    });
 
-window.onload = () => {
-  generateCanvasCells();
+    cell.addEventListener("mouseenter", (e) => {
+      const thisX = Number(e.target.dataset.x);
+      const thisY = Number(e.target.dataset.y);
+      if (!prevPos) {
+        changeCellColor(thisX, thisY);
+      } else {
+        plotLine(prevPos.x, prevPos.y, thisX, thisY);
+      }
+    });
+  });
 
   // Invalidate the previous position if the mouse leaves the canvas,
   // otherwise the line will jump once it reenters.
   fakeCanvas.addEventListener("mouseleave", () => {
     prevPos = undefined;
   });
+}
+
+window.onload = () => {
+  generateCells();
 
   resetButton.addEventListener("click", (e) => {
     resetCanvas();
   });
+
+  startPainting();
 };
